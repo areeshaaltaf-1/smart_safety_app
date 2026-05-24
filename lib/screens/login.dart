@@ -1,3 +1,5 @@
+
+import 'dashboard.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -24,10 +26,6 @@ class _LoginScreenState extends State<LoginScreen> {
   // LOGIN FUNCTION
   void loginUser() async {
 
-    setState(() {
-      isLoading = true;
-    });
-
     try {
 
       await FirebaseAuth.instance
@@ -49,13 +47,24 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       );
 
+      // 🔥 NAVIGATE TO DASHBOARD
+      Navigator.pushReplacement(
+
+        context,
+
+        MaterialPageRoute(
+          builder: (context) =>
+          const DashboardScreen(),
+        ),
+      );
+
     }
 
     on FirebaseAuthException catch (e) {
 
       String message = "";
 
-      // EMAIL NOT FOUND
+      // NO ACCOUNT
       if (e.code == 'user-not-found') {
 
         message =
@@ -94,10 +103,6 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       );
     }
-
-    setState(() {
-      isLoading = false;
-    });
   }
 
   @override
@@ -113,9 +118,13 @@ class _LoginScreenState extends State<LoginScreen> {
 
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [Colors.blue, Colors.black],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
+            colors: [
+              Color(0xFF1E293B),
+              Color(0xFF334155),
+              Color(0xFF0F766E),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
           ),
         ),
 

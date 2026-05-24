@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'dashboard.dart';
 
 import 'login.dart';
 
@@ -77,11 +78,13 @@ class _SignupScreenState extends State<SignupScreen> {
   void signupUser() async {
 
     setState(() {
+
       emailError =
           validateEmail(emailController.text);
 
       passwordError =
           validatePassword(passwordController.text);
+
     });
 
     if (emailError != null ||
@@ -93,24 +96,71 @@ class _SignupScreenState extends State<SignupScreen> {
 
       await FirebaseAuth.instance
           .createUserWithEmailAndPassword(
+
         email: emailController.text.trim(),
-        password: passwordController.text.trim(),
+
+        password:
+        passwordController.text.trim(),
       );
 
       ScaffoldMessenger.of(context).showSnackBar(
+
         const SnackBar(
-          content: Text("Account Created"),
+          content:
+          Text("Account Created Successfully"),
+        ),
+      );
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const DashboardScreen(),
         ),
       );
 
-    } on FirebaseAuthException catch (e) {
+
+    }
+
+    on FirebaseAuthException catch (e) {
+
+      String message = "";
+
+      // EMAIL ALREADY EXISTS
+      if (e.code == 'email-already-in-use') {
+
+        message =
+        "Account already exists";
+
+      }
+
+      // INVALID EMAIL
+      else if (e.code == 'invalid-email') {
+
+        message =
+        "Invalid email";
+
+      }
+
+      // WEAK PASSWORD
+      else if (e.code == 'weak-password') {
+
+        message =
+        "Weak password";
+
+      }
+
+      else {
+
+        message =
+            e.message ?? "Signup Failed";
+
+      }
 
       ScaffoldMessenger.of(context).showSnackBar(
+
         SnackBar(
-          content: Text(e.message ?? "Signup Failed"),
+          content: Text(message),
         ),
       );
-
     }
   }
 
@@ -127,9 +177,13 @@ class _SignupScreenState extends State<SignupScreen> {
 
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [Colors.blue, Colors.black],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
+            colors: [
+              Color(0xFF1E293B),
+              Color(0xFF334155),
+              Color(0xFF0F766E),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
           ),
         ),
 

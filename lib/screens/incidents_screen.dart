@@ -24,52 +24,47 @@ class _IncidentsScreenState extends State<IncidentsScreen> {
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    loadData();
-  }
-
-  @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       appBar: AppBar(
         title: const Text("Incident History"),
         backgroundColor: const Color(0xFF1E293B),
       ),
 
-      body: incidents.isEmpty
-          ? const Center(child: Text("No incidents reported"))
-          : ListView.builder(
+      body: ListView.builder(
         itemCount: incidents.length,
         itemBuilder: (context, index) {
 
-          final item = incidents[index];
+          final incident = incidents[index];
 
           return Card(
             margin: const EdgeInsets.all(10),
-            child: Padding(
-              padding: const EdgeInsets.all(12),
+            child: ListTile(
 
-              child: Column(
+              title: Text(incident["title"] ?? ""),
+
+              subtitle: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
 
-                  Text(
-                    item["title"] ?? "",
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  Text("Location: ${incident["location"] ?? "Auto GPS"}"),
+                  Text("Category: ${incident["category"] ?? ""}"),
+                  Text("Severity: ${incident["severity"] ?? ""}"),
+
+                ],
+              ),
+
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+
+                  IconButton(
+                    icon: const Icon(Icons.delete, color: Colors.red),
+                    onPressed: () {
+                      IncidentService.deleteIncident(index);
+                      loadData();
+                    },
                   ),
-
-                  const SizedBox(height: 5),
-
-                  Text("📍 Location: ${item["location"] ?? ""}"),
-                  Text("⚠ Severity: ${item["severity"] ?? ""}"),
-                  Text("📂 Category: ${item["category"] ?? ""}"),
-                  Text("📝 Description: ${item["description"] ?? ""}"),
-                  Text("⏰ Time: ${item["time"] ?? ""}"),
                 ],
               ),
             ),

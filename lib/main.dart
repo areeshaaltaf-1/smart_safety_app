@@ -8,12 +8,12 @@ import 'screens/splash_screen.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Firebase init
+  // 🔥 Firebase init
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  // Hive init (IMPORTANT)
+  // 🧠 Hive init (OFFLINE STORAGE)
   await Hive.initFlutter();
   await Hive.openBox('incidentsBox');
 

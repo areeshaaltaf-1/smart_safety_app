@@ -1,26 +1,30 @@
-import 'package:hive_flutter/hive_flutter.dart';
+import 'package:hive/hive.dart';
 
 class IncidentService {
+
   static final Box box = Hive.box('incidentsBox');
 
-  // ADD INCIDENT
+  // ➕ ADD INCIDENT
   static void addIncident(Map<String, dynamic> incident) {
     box.add(incident);
   }
 
-  // GET ALL INCIDENTS
+  // 📥 GET ALL
   static List<Map<String, dynamic>> getIncidents() {
-    return box.values
-        .map((e) => Map<String, dynamic>.from(e))
-        .toList();
+    return box.values.map((e) => Map<String, dynamic>.from(e)).toList();
   }
 
-  // DELETE INCIDENT
+  // ❌ DELETE
   static void deleteIncident(int index) {
     box.deleteAt(index);
   }
 
-  // CLEAR ALL (optional)
+  // ✏ UPDATE
+  static void updateIncident(int index, Map<String, dynamic> data) {
+    box.putAt(index, data);
+  }
+
+  // 🧹 CLEAR ALL
   static void clearAll() {
     box.clear();
   }

@@ -100,7 +100,7 @@ class _ReportIncidentScreenState extends State<ReportIncidentScreen> {
       "lng": position?.longitude,
 
       "image": imageBytes != null ? base64Encode(imageBytes!) : null,
-      "time": DateTime.now().toString(),
+      "time": DateTime.now().millisecondsSinceEpoch,
     });
 
     ScaffoldMessenger.of(context).showSnackBar(
@@ -157,8 +157,16 @@ class _ReportIncidentScreenState extends State<ReportIncidentScreen> {
       backgroundColor: const Color(0xFF0F172A),
 
       appBar: AppBar(
-        title: const Text("Report Incident"),
+        centerTitle: true,
         backgroundColor: const Color(0xFF1F2937),
+        title: const Text(
+          "REPORT INCIDENT",
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 1.5,
+          ),
+        ),
       ),
 
       body: SingleChildScrollView(

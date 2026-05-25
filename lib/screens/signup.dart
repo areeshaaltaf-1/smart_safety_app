@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'dashboard.dart';
 
+import 'dashboard.dart';
 import 'login.dart';
 
 class SignupScreen extends StatefulWidget {
@@ -17,15 +17,16 @@ class _SignupScreenState extends State<SignupScreen> {
   final passwordController = TextEditingController();
 
   bool obscurePassword = true;
+  bool isLoading = false;
 
   String? emailError;
   String? passwordError;
 
-  // EMAIL VALIDATION
+  // 🔥 STRICT EMAIL VALIDATION
   String? validateEmail(String email) {
 
     final regex = RegExp(
-      r'^[a-zA-Z0-9._%+-]+@(gmail|yahoo|outlook)\.com$',
+      r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9-]+\.[a-zA-Z]{2,}$',
     );
 
     if (email.isEmpty) {
@@ -33,251 +34,186 @@ class _SignupScreenState extends State<SignupScreen> {
     }
 
     if (!regex.hasMatch(email)) {
-      return "Enter valid email (.com required)";
+      return "Enter a valid email (example: name@gmail.com)";
+    }
+
+    // ❌ extra safety checks (block fake formats)
+    if (email.contains('..') ||
+        email.startsWith('.') ||
+        email.endsWith('.') ||
+        email.contains('@.') ||
+        email.contains('.@')) {
+      return "Invalid email format";
     }
 
     return null;
   }
 
-  // PASSWORD VALIDATION
+  // 🔥 PASSWORD VALIDATION (your rules)
   String? validatePassword(String password) {
 
-    final hasUppercase =
-    password.contains(RegExp(r'[A-Z]'));
-
-    final hasNumber =
-    password.contains(RegExp(r'[0-9]'));
-
-    final hasSpecial =
-    password.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'));
+    final hasUppercase = password.contains(RegExp(r'[A-Z]'));
+    final hasSpecial = password.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'));
 
     if (password.isEmpty) {
       return "Password cannot be empty";
     }
 
-    if (password.length < 8) {
-      return "Minimum 8 characters";
+    if (password.length < 5) {
+      return "Minimum 5 characters required";
     }
 
     if (!hasUppercase) {
-      return "Add 1 uppercase letter";
-    }
-
-    if (!hasNumber) {
-      return "Add 1 number";
+      return "At least 1 uppercase letter required";
     }
 
     if (!hasSpecial) {
-      return "Add 1 special character";
+      return "At least 1 special character required";
     }
 
     return null;
   }
 
-  // SIGNUP FUNCTION
+  // 🚀 SIGNUP FUNCTION
   void signupUser() async {
 
     setState(() {
-
-      emailError =
-          validateEmail(emailController.text);
-
-      passwordError =
-          validatePassword(passwordController.text);
-
+      emailError = validateEmail(emailController.text.trim());
+      passwordError = validatePassword(passwordController.text);
     });
 
-    if (emailError != null ||
-        passwordError != null) {
+    if (emailError != null || passwordError != null) {
       return;
     }
 
     try {
+      setState(() => isLoading = true);
 
-      await FirebaseAuth.instance
-          .createUserWithEmailAndPassword(
-
+      await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: emailController.text.trim(),
-
-        password:
-        passwordController.text.trim(),
+        password: passwordController.text.trim(),
       );
 
-      ScaffoldMessenger.of(context).showSnackBar(
-
-        const SnackBar(
-          content:
-          Text("Account Created Successfully"),
-        ),
-      );
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(
-          builder: (context) => const DashboardScreen(),
-        ),
+        MaterialPageRoute(builder: (_) => const DashboardScreen()),
       );
 
+    } on FirebaseAuthException catch (e) {
 
-    }
+      String message = "Signup failed";
 
-    on FirebaseAuthException catch (e) {
-
-      String message = "";
-
-      // EMAIL ALREADY EXISTS
       if (e.code == 'email-already-in-use') {
-
-        message =
-        "Account already exists";
-
-      }
-
-      // INVALID EMAIL
-      else if (e.code == 'invalid-email') {
-
-        message =
-        "Invalid email";
-
-      }
-
-      // WEAK PASSWORD
-      else if (e.code == 'weak-password') {
-
-        message =
-        "Weak password";
-
-      }
-
-      else {
-
-        message =
-            e.message ?? "Signup Failed";
-
+        message = "Account already exists";
+      } else if (e.code == 'invalid-email') {
+        message = "Invalid email format";
+      } else if (e.code == 'weak-password') {
+        message = "Password too weak";
       }
 
       ScaffoldMessenger.of(context).showSnackBar(
-
-        SnackBar(
-          content: Text(message),
-        ),
+        SnackBar(content: Text(message)),
       );
+
+    } finally {
+      setState(() => isLoading = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
-
       body: Container(
-
         padding: const EdgeInsets.all(20),
-
         width: double.infinity,
-
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [
+              Color(0xFF0F172A),
               Color(0xFF1E293B),
-              Color(0xFF334155),
               Color(0xFF0F766E),
             ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
           ),
         ),
 
         child: Center(
-
           child: SingleChildScrollView(
-
             child: Column(
-
               children: [
 
-                const Icon(
-                  Icons.person_add,
-                  size: 90,
-                  color: Colors.white,
-                ),
+                const Icon(Icons.person_add,
+                    size: 75, color: Colors.white),
 
-                const SizedBox(height: 20),
+                const SizedBox(height: 10),
 
                 const Text(
                   "Create Account",
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: 28,
+                    fontSize: 22,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
 
-                const SizedBox(height: 30),
+                const SizedBox(height: 18),
 
                 // EMAIL FIELD
                 TextField(
                   controller: emailController,
-
-                  onChanged: (_) {
-
+                  onChanged: (value) {
                     setState(() {
-
-                      emailError =
-                          validateEmail(
-                              emailController.text);
-
+                      emailError = validateEmail(value.trim());
                     });
-
                   },
 
+                  style: const TextStyle(color: Colors.black),
+
                   decoration: InputDecoration(
+                    labelText: "Email",
                     filled: true,
                     fillColor: Colors.white,
-                    labelText: "Email",
+                    isDense: true,
                     errorText: emailError,
+                    helperText: "Example: name@gmail.com",
+
+                    contentPadding: const EdgeInsets.symmetric(
+                        vertical: 10, horizontal: 12),
 
                     border: OutlineInputBorder(
-                      borderRadius:
-                      BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(10),
                     ),
                   ),
                 ),
 
-                const SizedBox(height: 20),
+                const SizedBox(height: 10),
 
                 // PASSWORD FIELD
                 TextField(
                   controller: passwordController,
-
                   obscureText: obscurePassword,
-
-                  onChanged: (_) {
-
+                  onChanged: (value) {
                     setState(() {
-
-                      passwordError =
-                          validatePassword(
-                              passwordController.text);
-
+                      passwordError = validatePassword(value);
                     });
-
                   },
 
-                  decoration: InputDecoration(
+                  style: const TextStyle(color: Colors.black),
 
+                  decoration: InputDecoration(
+                    labelText: "Password",
                     filled: true,
                     fillColor: Colors.white,
-
-                    labelText: "Password",
-
-                    helperText:
-                    "Use uppercase, number & special character",
+                    isDense: true,
 
                     errorText: passwordError,
+                    helperText:
+                    "Min 5 chars, 1 uppercase, 1 special character",
+
+                    contentPadding: const EdgeInsets.symmetric(
+                        vertical: 10, horizontal: 12),
 
                     border: OutlineInputBorder(
-                      borderRadius:
-                      BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(10),
                     ),
 
                     suffixIcon: IconButton(
@@ -286,65 +222,51 @@ class _SignupScreenState extends State<SignupScreen> {
                             ? Icons.visibility_off
                             : Icons.visibility,
                       ),
-
                       onPressed: () {
-
                         setState(() {
-
-                          obscurePassword =
-                          !obscurePassword;
-
+                          obscurePassword = !obscurePassword;
                         });
-
                       },
                     ),
                   ),
                 ),
 
-                const SizedBox(height: 30),
+                const SizedBox(height: 16),
 
                 SizedBox(
-
                   width: double.infinity,
-                  height: 50,
-
+                  height: 42,
                   child: ElevatedButton(
-
-                    onPressed: signupUser,
+                    onPressed: isLoading ? null : signupUser,
 
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.white,
                       foregroundColor: Colors.black,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
                     ),
 
-                    child: const Text(
-                      "Sign Up",
-                    ),
+                    child: isLoading
+                        ? const CircularProgressIndicator()
+                        : const Text("Sign Up"),
                   ),
                 ),
 
-                const SizedBox(height: 20),
+                const SizedBox(height: 10),
 
-                // LOGIN OPTION
                 TextButton(
-
                   onPressed: () {
-
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) =>
-                        const LoginScreen(),
+                        builder: (_) => const LoginScreen(),
                       ),
                     );
-
                   },
-
                   child: const Text(
                     "Already have an account? Login",
-                    style: TextStyle(
-                      color: Colors.white,
-                    ),
+                    style: TextStyle(color: Colors.white),
                   ),
                 ),
               ],

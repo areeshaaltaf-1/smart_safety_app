@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -17,46 +18,54 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final cnicController = TextEditingController();
 
   File? imageFile;
+  String? imageBase64;
 
   final picker = ImagePicker();
 
   bool isVerified = false;
-
   String? cnicError;
 
-  // 📌 CNIC VALIDATION
-  String? validateCNIC(String value) {
+  @override
+  void initState() {
+    super.initState();
+    loadProfile();
+  }
 
+  void loadProfile() {
+    final data = ProfileService.getProfile();
+
+    nameController.text = data["name"] ?? "";
+    cnicController.text = data["cnic"] ?? "";
+    isVerified = data["verified"] ?? false;
+
+    imageBase64 = data["image"];
+
+    setState(() {});
+  }
+
+  String? validateCNIC(String value) {
     final regex = RegExp(r'^[0-9]{5}-[0-9]{7}-[0-9]{1}$');
 
-    if (value.isEmpty) {
-      return "CNIC is required";
-    }
-
-    if (!regex.hasMatch(value)) {
-      return "Format: 12345-1234567-1";
-    }
+    if (value.isEmpty) return "CNIC is required";
+    if (!regex.hasMatch(value)) return "Format: 12345-1234567-1";
 
     return null;
   }
 
-  // 📷 PICK IMAGE
   Future<void> pickImage() async {
-
-    final picked = await picker.pickImage(
-      source: ImageSource.gallery,
-    );
+    final picked = await picker.pickImage(source: ImageSource.gallery);
 
     if (picked != null) {
+      final bytes = await picked.readAsBytes();
+
       setState(() {
         imageFile = File(picked.path);
+        imageBase64 = base64Encode(bytes);
       });
     }
   }
 
-  // 💾 SAVE PROFILE
   void saveProfile() {
-
     setState(() {
       cnicError = validateCNIC(cnicController.text);
     });
@@ -67,12 +76,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
       "name": nameController.text,
       "cnic": cnicController.text,
       "verified": isVerified,
+      "image": imageBase64,
     });
 
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text("Profile Saved Successfully"),
-      ),
+      const SnackBar(content: Text("Profile Saved Successfully")),
     );
 
     Navigator.pop(context);
@@ -80,83 +88,65 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
-
       backgroundColor: const Color(0xFF0F172A),
 
       appBar: AppBar(
-        title: const Text("User Profile"),
         backgroundColor: const Color(0xFF1E293B),
+        centerTitle: true,
+        iconTheme: const IconThemeData(color: Colors.white),
+
+        title: const Text(
+          "USER PROFILE",
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 2,
+          ),
+        ),
       ),
 
       body: SingleChildScrollView(
-
         padding: const EdgeInsets.all(16),
-
         child: Column(
-
           children: [
 
-            // 📷 PROFILE IMAGE
             GestureDetector(
               onTap: pickImage,
               child: CircleAvatar(
                 radius: 55,
                 backgroundColor: Colors.tealAccent,
-                backgroundImage:
-                imageFile != null ? FileImage(imageFile!) : null,
-                child: imageFile == null
-                    ? const Icon(Icons.camera_alt,
-                    color: Colors.black, size: 30)
+                backgroundImage: imageBase64 != null
+                    ? MemoryImage(base64Decode(imageBase64!))
+                    : null,
+                child: imageBase64 == null
+                    ? const Icon(Icons.camera_alt, size: 30, color: Colors.black)
                     : null,
               ),
             ),
 
             const SizedBox(height: 20),
 
-            // NAME FIELD
             TextField(
               controller: nameController,
               style: const TextStyle(color: Colors.white),
-              decoration: InputDecoration(
-                labelText: "Full Name",
-                labelStyle: const TextStyle(color: Colors.white70),
-                filled: true,
-                fillColor: const Color(0xFF1F2937),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
+              decoration: inputStyle("Full Name"),
             ),
 
-            const SizedBox(height: 15),
+            const SizedBox(height: 12),
 
-            // CNIC FIELD
             TextField(
               controller: cnicController,
-              keyboardType: TextInputType.number,
               style: const TextStyle(color: Colors.white),
-              onChanged: (value) {
-                setState(() {
-                  cnicError = validateCNIC(value);
-                });
+              onChanged: (v) {
+                setState(() => cnicError = validateCNIC(v));
               },
-              decoration: InputDecoration(
-                labelText: "CNIC (XXXXX-XXXXXXX-X)",
-                labelStyle: const TextStyle(color: Colors.white70),
-                errorText: cnicError,
-                filled: true,
-                fillColor: const Color(0xFF1F2937),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
+              decoration: inputStyle("CNIC (XXXXX-XXXXXXX-X)")
+                  .copyWith(errorText: cnicError),
             ),
 
             const SizedBox(height: 20),
 
-            // VERIFIED SWITCH
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
@@ -166,48 +156,45 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-
-                  const Text(
-                    "Mark as Verified User",
-                    style: TextStyle(color: Colors.white),
-                  ),
-
+                  const Text("Mark Verified",
+                      style: TextStyle(color: Colors.white)),
                   Switch(
                     value: isVerified,
+                    onChanged: (v) => setState(() => isVerified = v),
                     activeColor: Colors.tealAccent,
-                    onChanged: (value) {
-                      setState(() {
-                        isVerified = value;
-                      });
-                    },
                   )
                 ],
               ),
             ),
 
-            const SizedBox(height: 30),
+            const SizedBox(height: 25),
 
-            // SAVE BUTTON
             SizedBox(
               width: double.infinity,
-              height: 50,
+              height: 45,
               child: ElevatedButton(
                 onPressed: saveProfile,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.tealAccent,
                   foregroundColor: Colors.black,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
                 ),
-                child: const Text(
-                  "SAVE PROFILE",
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
+                child: const Text("SAVE PROFILE"),
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  InputDecoration inputStyle(String label) {
+    return InputDecoration(
+      labelText: label,
+      labelStyle: const TextStyle(color: Colors.white70),
+      filled: true,
+      fillColor: const Color(0xFF1F2937),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
       ),
     );
   }

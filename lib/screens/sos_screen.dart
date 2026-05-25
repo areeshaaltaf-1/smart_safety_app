@@ -58,8 +58,16 @@ class _SOSScreenState extends State<SOSScreen> {
           : const Color(0xFF0F172A),
 
       appBar: AppBar(
-        title: const Text("SOS Emergency"),
+        centerTitle: true,
         backgroundColor: const Color(0xFF1E293B),
+        title: const Text(
+          "SOS EMERGENCY",
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 1.5,
+          ),
+        ),
       ),
 
       body: Center(

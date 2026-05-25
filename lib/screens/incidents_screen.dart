@@ -27,8 +27,16 @@ class _IncidentsScreenState extends State<IncidentsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Incident History"),
+        centerTitle: true,
         backgroundColor: const Color(0xFF1E293B),
+        title: const Text(
+          "INCIDENT HISTORY",
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 1.5,
+          ),
+        ),
       ),
 
       body: ListView.builder(

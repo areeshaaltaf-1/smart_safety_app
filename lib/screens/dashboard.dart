@@ -1,24 +1,67 @@
 import 'package:flutter/material.dart';
-
 import 'report_incident_screen.dart';
 import 'safety_map_screen.dart';
+import 'incidents_screen.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
 
+  Widget buildCard({
+    required String title,
+    required IconData icon,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(20),
+        margin: const EdgeInsets.only(bottom: 15),
+
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.circular(14),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.15),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            )
+          ],
+        ),
+
+        child: Row(
+          children: [
+            Icon(icon, color: Colors.white, size: 28),
+            const SizedBox(width: 12),
+            Text(
+              title,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
       appBar: AppBar(
         title: const Text("Dashboard"),
         backgroundColor: const Color(0xFF1E293B),
       ),
 
-      body: Padding(
+      body: Container(
         padding: const EdgeInsets.all(16),
 
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
 
             const SizedBox(height: 20),
@@ -33,8 +76,10 @@ class DashboardScreen extends StatelessWidget {
 
             const SizedBox(height: 30),
 
-            // 🔥 REPORT INCIDENT CARD (CLICKABLE)
-            GestureDetector(
+            buildCard(
+              title: "Report Incident",
+              icon: Icons.report,
+              color: const Color(0xFF1E293B),
               onTap: () {
                 Navigator.push(
                   context,
@@ -43,34 +88,12 @@ class DashboardScreen extends StatelessWidget {
                   ),
                 );
               },
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(20),
-                margin: const EdgeInsets.only(bottom: 15),
-
-                decoration: BoxDecoration(
-                  color: const Color(0xFF1E293B),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-
-                child: const Row(
-                  children: [
-                    Icon(Icons.report, color: Colors.white),
-                    SizedBox(width: 10),
-                    Text(
-                      "Report Incident",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
             ),
 
-            // 🔥 SAFETY MAP CARD (CLICKABLE)
-            GestureDetector(
+            buildCard(
+              title: "Safety Map",
+              icon: Icons.map,
+              color: const Color(0xFF0F766E),
               onTap: () {
                 Navigator.push(
                   context,
@@ -79,31 +102,21 @@ class DashboardScreen extends StatelessWidget {
                   ),
                 );
               },
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(20),
-
-                decoration: BoxDecoration(
-                  color: const Color(0xFF0F766E),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-
-                child: const Row(
-                  children: [
-                    Icon(Icons.map, color: Colors.white),
-                    SizedBox(width: 10),
-                    Text(
-                      "Safety Map",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
             ),
 
+            buildCard(
+              title: "Incident History",
+              icon: Icons.list_alt,
+              color: const Color(0xFF334155),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const IncidentsScreen(),
+                  ),
+                );
+              },
+            ),
           ],
         ),
       ),

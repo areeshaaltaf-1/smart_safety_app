@@ -30,9 +30,13 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
+
       body: Container(
+
         width: double.infinity,
+
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [

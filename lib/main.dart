@@ -6,14 +6,15 @@ import 'firebase_options.dart';
 import 'screens/splash_screen.dart';
 
 void main() async {
+
   WidgetsFlutterBinding.ensureInitialized();
 
-  // 🔥 Firebase init
+  // 🔥 Firebase
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  // 🧠 Hive init (OFFLINE STORAGE)
+  // 🧠 Hive
   await Hive.initFlutter();
   await Hive.openBox('incidentsBox');
 
@@ -25,6 +26,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
     return const MaterialApp(
       debugShowCheckedModeBanner: false,
       home: SplashScreen(),

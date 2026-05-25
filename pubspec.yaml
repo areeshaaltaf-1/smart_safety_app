@@ -13,9 +13,10 @@ dependencies:
 
   cupertino_icons: ^1.0.8
 
-  # 🔥 FIREBASE
+  # 🔥 FIREBASE CORE
   firebase_core: ^3.13.0
   firebase_auth: ^5.5.2
+  firebase_messaging: ^15.0.0
 
   # 🌍 MAP (OpenStreetMap)
   flutter_map: ^6.1.0
@@ -25,14 +26,17 @@ dependencies:
   hive: ^2.2.3
   hive_flutter: ^1.1.0
 
-  # 📍 LOCATION
+  # 📍 LOCATION (GPS)
   geolocator: ^13.0.0
 
-  # 📁 FILE STORAGE (images, cache)
+  # 📁 FILE STORAGE
   path_provider: ^2.1.2
 
-  # 📷 CAMERA (YOU NEED THIS FOR INCIDENT PHOTO)
+  # 📷 IMAGE PICKER (WEB + MOBILE SAFE)
   image_picker: ^1.0.7
+
+  # 🔔 LOCAL NOTIFICATIONS (FOR FCM DISPLAY)
+  flutter_local_notifications: ^17.0.0
 
 dev_dependencies:
   flutter_test:

@@ -5,6 +5,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../services/incident_service.dart';
+import '../services/profile_service.dart';
 
 class ReportIncidentScreen extends StatefulWidget {
   const ReportIncidentScreen({super.key});
@@ -28,7 +29,7 @@ class _ReportIncidentScreenState extends State<ReportIncidentScreen> {
 
   final picker = ImagePicker();
 
-  // 📍 GPS (UNCHANGED)
+  // 📍 GPS
   Future<void> getLocation() async {
     setState(() => loadingGPS = true);
 
@@ -51,7 +52,7 @@ class _ReportIncidentScreenState extends State<ReportIncidentScreen> {
     setState(() => loadingGPS = false);
   }
 
-  // 📷 IMAGE (WEB SAFE)
+  // 📷 IMAGE
   Future<void> pickImage() async {
     final picked = await ImagePicker().pickImage(source: ImageSource.gallery);
 
@@ -74,6 +75,17 @@ class _ReportIncidentScreenState extends State<ReportIncidentScreen> {
       return;
     }
 
+    // ⭐ VERIFICATION CHECK (IMPORTANT PART)
+    if (severity == "High" && !ProfileService.isVerifiedUser()) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Only VERIFIED users can report HIGH severity incidents"),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
     if (position == null) {
       await getLocation();
     }
@@ -84,13 +96,10 @@ class _ReportIncidentScreenState extends State<ReportIncidentScreen> {
       "category": category,
       "severity": severity,
 
-      // GPS
       "lat": position?.latitude,
       "lng": position?.longitude,
 
-      // IMAGE
       "image": imageBytes != null ? base64Encode(imageBytes!) : null,
-
       "time": DateTime.now().toString(),
     });
 
@@ -107,7 +116,6 @@ class _ReportIncidentScreenState extends State<ReportIncidentScreen> {
     });
   }
 
-  // 🎨 INPUT FIELD
   Widget inputField(String label, TextEditingController controller, IconData icon) {
     return TextField(
       controller: controller,
@@ -125,7 +133,6 @@ class _ReportIncidentScreenState extends State<ReportIncidentScreen> {
     );
   }
 
-  // 🎨 DROPDOWN
   Widget dropdown(String label, String value, List<String> items, Function(String?) onChanged) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -186,20 +193,7 @@ class _ReportIncidentScreenState extends State<ReportIncidentScreen> {
               onPressed: getLocation,
               icon: const Icon(Icons.my_location),
               label: const Text("Get GPS Location"),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF10B981),
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
             ),
-
-            const SizedBox(height: 10),
-
-            if (loadingGPS)
-              const Text("Fetching GPS...", style: TextStyle(color: Colors.white70)),
 
             if (position != null)
               Text(
@@ -213,28 +207,7 @@ class _ReportIncidentScreenState extends State<ReportIncidentScreen> {
               onPressed: pickImage,
               icon: const Icon(Icons.photo),
               label: const Text("Add Photo"),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF3B82F6),
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
             ),
-
-            if (imageBytes != null)
-              Padding(
-                padding: const EdgeInsets.only(top: 12),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: Image.memory(
-                    imageBytes!,
-                    height: 160,
-                    fit: BoxFit.cover,
-                  ),
-                ),
-              ),
 
             const SizedBox(height: 25),
 
@@ -242,19 +215,9 @@ class _ReportIncidentScreenState extends State<ReportIncidentScreen> {
               onPressed: submitIncident,
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF6366F1),
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
-                ),
               ),
-              child: const Text(
-                "SUBMIT INCIDENT",
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
+              child: const Text("SUBMIT INCIDENT"),
             ),
-
-            const SizedBox(height: 20),
           ],
         ),
       ),

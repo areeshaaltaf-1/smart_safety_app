@@ -15,8 +15,10 @@ void main() async {
   );
 
   // 🧠 Hive
+
   await Hive.initFlutter();
   await Hive.openBox('incidentsBox');
+  await Hive.openBox('userBox');
 
   runApp(const MyApp());
 }
